@@ -1,6 +1,6 @@
 {
   "name": "iii-validator",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "This is package for TypeScript project. If you give it a classes, you can perform validation.",
   "main": "index.js",
   "scripts": {
