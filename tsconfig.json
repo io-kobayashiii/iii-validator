@@ -1,0 +1,12 @@
+{
+	"compilerOptions": {
+		"target": "ES5",
+		"module": "ES2015",
+		"strict": true,
+		"esModuleInterop": true,
+    "outDir": "build"
+  },
+  "include": [
+    "src"
+  ],
+}
