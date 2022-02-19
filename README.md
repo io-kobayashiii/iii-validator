@@ -1,5 +1,5 @@
 # インストール
-```
+```bash
 npm install iii-validator
 ```
 
@@ -10,7 +10,7 @@ npm install iii-validator
 4. バリデーション対象要素と error-tip 要素を `form-group` クラスを付与した要素でラップ
 
 例）
-```
+```html
 <div class='form-group'>
     <input name='email' type='text' class='validate validations::empty'>
     <p class=='error-tip'></p>
@@ -18,11 +18,11 @@ npm install iii-validator
 ```
 
 上記のように要素を準備したら {package-name} のインスタンスを生成  
-```
+```javascript
 const Validator = new Validator()
 ```
 
 あとは任意のタイミングで `validate` をトリガー  
-```
+```javascript
 Validator.trigger('vaidate')
 ```
