@@ -1,17 +1,13 @@
 {
-	"compilerOptions": {
-		"target": "ES5",
-		"module": "ES2015",
-		"strict": true,
-		"esModuleInterop": true,
-    "declaration": true,
-    "rootDir": "./src",
-    "outDir": "./"
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "esModuleInterop": true,
+    "strict": true,
+    "lib": ["ESNext", "dom"],
+    "types": ["node", "jest"],
+    "outDir": "dist"
   },
-  "include": [
-    "./src"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+  "include": ["src"]
 }
