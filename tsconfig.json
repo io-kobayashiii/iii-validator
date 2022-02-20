@@ -4,9 +4,14 @@
 		"module": "ES2015",
 		"strict": true,
 		"esModuleInterop": true,
-    "outDir": "build"
+    "declaration": true,
+    "rootDir": "./src",
+    "outDir": "./"
   },
   "include": [
-    "src"
+    "./src"
   ],
+  "exclude": [
+    "node_modules"
+  ]
 }

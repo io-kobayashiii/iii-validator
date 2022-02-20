@@ -1,4 +1,4 @@
-export class TriggerableFunctions {
+export declare class TriggerableFunctions {
     functions: {
         [key: string]: (() => any)[];
     };
