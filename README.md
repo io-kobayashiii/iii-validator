@@ -13,7 +13,7 @@ npm install iii-validator
 ```html
 <div class='form-group'>
     <input name='email' type='text' class='validate validations::empty'>
-    <p class=='error-tip'></p>
+    <p class='error-tip'></p>
 </div>
 ```
 
@@ -24,5 +24,5 @@ const Validator = new Validator()
 
 あとは任意のタイミングで `validate` をトリガー  
 ```javascript
-Validator.trigger('vaidate')
+Validator.trigger('validate')
 ```

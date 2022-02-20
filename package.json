@@ -1,10 +1,10 @@
 {
   "name": "iii-validator",
-  "version": "1.0.2",
-  "description": "This is package for TypeScript project. If you give it a classes, you can perform validation.",
+  "version": "1.0.3",
+  "description": "If you give it a classes, you can perform validation.",
   "main": "index.js",
   "scripts": {
-    "build": "webpack",
+    "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1",
     "prepublish": "$(npm bin)/tsc"
   },
@@ -24,8 +24,6 @@
   "homepage": "https://github.com/io-kobayashiii/iii-validator#readme",
   "devDependencies": {
     "ts-loader": "^9.2.6",
-    "typescript": "^4.5.5",
-    "webpack": "^5.69.1",
-    "webpack-cli": "^4.9.2"
+    "typescript": "^4.5.5"
   }
 }
