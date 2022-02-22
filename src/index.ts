@@ -16,7 +16,8 @@ class TriggerableFunctions {
 }
 type ValidatorInitializerProps = {
 	validationGroup?: Document | HTMLElement
-	additionalInvalidClasses?: string[]
+	validClasses?: string[]
+	invalidClasses?: string[]
 	triggerName?: string
 }
 
@@ -25,7 +26,6 @@ export default class ValidatorInitializer {
 	triggerName: string
 	TriggerableFunctions: TriggerableFunctions
 	elements: HTMLCollectionOf<Element>
-
 	constructor(options?: ValidatorInitializerProps) {
 		this.validationGroup = options?.validationGroup || document
 		this.triggerName = options?.triggerName || ('validate' as string)
@@ -35,7 +35,8 @@ export default class ValidatorInitializer {
 			new Validator({
 				validationGroup: this.validationGroup,
 				element: element,
-				additionalInvalidClasses: options?.additionalInvalidClasses,
+				validClasses: options?.validClasses,
+				invalidClasses: options?.invalidClasses,
 				triggerableFunctions: this.TriggerableFunctions,
 				triggerName: this.triggerName,
 			})
@@ -49,7 +50,8 @@ export default class ValidatorInitializer {
 type ValidatorProps = {
 	validationGroup: Document | HTMLElement
 	element: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-	additionalInvalidClasses?: string[]
+	validClasses?: string[]
+	invalidClasses?: string[]
 	triggerableFunctions: TriggerableFunctions
 	triggerName: string
 }
@@ -57,24 +59,28 @@ type ValidatorProps = {
 export class Validator {
 	validationGroup: Document | HTMLElement
 	element: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-	additionalInvalidClasses?: string[]
+	validClasses?: string[]
+	invalidClasses?: string[]
 	name: string | null
 	triggerableFunctions: TriggerableFunctions
 	validations?: string[]
 	formGroupElement: HTMLElement | null
+	styleTargetElement: boolean
 	errorTipElement: HTMLElement | null
 	errorMessages: { [key: string]: string }
 	validateFunctions: { [key: string]: () => void }
 	value: number | boolean | string | null
 	currentValidation: string | null
-	constructor({ validationGroup, element, additionalInvalidClasses, triggerableFunctions, triggerName }: ValidatorProps) {
+	constructor({ validationGroup, element, validClasses, invalidClasses, triggerableFunctions, triggerName }: ValidatorProps) {
 		this.validationGroup = validationGroup
 		this.element = element
-		this.additionalInvalidClasses = additionalInvalidClasses
+		this.validClasses = validClasses
+		this.invalidClasses = invalidClasses
 		this.name = this.element.getAttribute('name')
 		this.triggerableFunctions = triggerableFunctions
 		this.validations = this.setValidations()
 		this.formGroupElement = element.closest('.form-group')
+		this.styleTargetElement = !!this.formGroupElement!.querySelector('.validate-style-target')
 		this.errorTipElement = this.formGroupElement!.querySelector('.error-tip')
 		this.errorMessages = this.setErrorMessages()
 		this.validateFunctions = this.setValidateFunctions()
@@ -93,7 +99,7 @@ export class Validator {
 	setErrorMessages() {
 		return {
 			empty: 'この項目は必須です。',
-			email: 'メールアドレスが不正です。',
+			email: 'メールアドレスの形式が正しくありません。',
 			confirmation: '入力内容が一致しません。',
 			halfWidthNumber: '半角数字で入力してください。',
 			katakana: '全角カタカナで入力してください。',
@@ -106,7 +112,17 @@ export class Validator {
 	setValidateFunctions() {
 		return {
 			empty: () => {
-				if (this.value == '') this.showErrorMessage('empty')
+				const value = this.value as string
+				switch (this.element.tagName) {
+					case 'input' || 'textarea':
+						if (this.value == '') this.showErrorMessage('empty')
+						break
+					case 'select':
+						if (value == 'unselected' || value == '') this.showErrorMessage('empty')
+						break
+					default:
+						break
+				}
 			},
 			multipleEmpty: () => {
 				let isMultipleEmptyValid = false as boolean
@@ -130,10 +146,6 @@ export class Validator {
 					})
 					this.showCustomErrorMessage(errorMessage)
 				}
-			},
-			selectEmpty: () => {
-				const value = this.value as string
-				if (value == 'unselected' || value == '') this.showErrorMessage('empty')
 			},
 			email: () => {
 				const value = this.value as string
@@ -199,15 +211,17 @@ export class Validator {
 		const p = document.createElement('p')
 		p.textContent = this.errorMessages[validationName]
 		this.errorTipElement!.appendChild(p)
+		this.validClasses?.forEach((_class) => this.element.classList.remove(_class))
 		this.element.classList.add('is-invalid')
-		this.additionalInvalidClasses?.forEach((_class) => this.element.classList.add(_class))
+		this.invalidClasses?.forEach((_class) => this.element.classList.add(_class))
 	}
 	showCustomErrorMessage(errorMessage: string) {
 		const p = document.createElement('p')
 		p.textContent = errorMessage
 		this.errorTipElement!.appendChild(p)
+		this.validClasses?.forEach((_class) => this.element.classList.remove(_class))
 		this.element.classList.add('is-invalid')
-		this.additionalInvalidClasses?.forEach((_class) => this.element.classList.add(_class))
+		this.invalidClasses?.forEach((_class) => this.element.classList.add(_class))
 	}
 	validate() {
 		if (Array.prototype.includes.call(this.element.classList, 'ignore-validation')) return
@@ -219,8 +233,9 @@ export class Validator {
 			this.currentValidation = null
 		})
 		if (this.errorTipElement!.innerHTML == '') {
+			this.validClasses?.forEach((_class) => this.element.classList.add(_class))
 			this.element.classList.remove('is-invalid')
-			this.additionalInvalidClasses?.forEach((_class) => this.element.classList.remove(_class))
+			this.invalidClasses?.forEach((_class) => this.element.classList.remove(_class))
 		}
 		if (this.validationGroup.querySelectorAll('.is-invalid').length)
 			this.validationGroup.querySelectorAll('.is-invalid')[0].scrollIntoView({ behavior: 'smooth', block: 'center' })
