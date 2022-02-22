@@ -16,6 +16,7 @@ class TriggerableFunctions {
 }
 type ValidatorInitializerProps = {
 	validationGroup?: Document | HTMLElement
+	additionalInvalidClasses?: string[]
 	triggerName?: string
 }
 
@@ -24,15 +25,17 @@ export default class ValidatorInitializer {
 	triggerName: string
 	TriggerableFunctions: TriggerableFunctions
 	elements: HTMLCollectionOf<Element>
-	constructor({ validationGroup, triggerName }: ValidatorInitializerProps) {
-		this.validationGroup = validationGroup || document
-		this.triggerName = triggerName || ('validate' as string)
+
+	constructor(options?: ValidatorInitializerProps) {
+		this.validationGroup = options?.validationGroup || document
+		this.triggerName = options?.triggerName || ('validate' as string)
 		this.TriggerableFunctions = new TriggerableFunctions()
 		this.elements = this.validationGroup.getElementsByClassName('validate')
 		Array.prototype.forEach.call(this.elements, (element) => {
 			new Validator({
 				validationGroup: this.validationGroup,
 				element: element,
+				additionalInvalidClasses: options?.additionalInvalidClasses,
 				triggerableFunctions: this.TriggerableFunctions,
 				triggerName: this.triggerName,
 			})
@@ -46,6 +49,7 @@ export default class ValidatorInitializer {
 type ValidatorProps = {
 	validationGroup: Document | HTMLElement
 	element: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+	additionalInvalidClasses?: string[]
 	triggerableFunctions: TriggerableFunctions
 	triggerName: string
 }
@@ -53,6 +57,7 @@ type ValidatorProps = {
 export class Validator {
 	validationGroup: Document | HTMLElement
 	element: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+	additionalInvalidClasses?: string[]
 	name: string | null
 	triggerableFunctions: TriggerableFunctions
 	validations?: string[]
@@ -62,9 +67,10 @@ export class Validator {
 	validateFunctions: { [key: string]: () => void }
 	value: number | boolean | string | null
 	currentValidation: string | null
-	constructor({ element, triggerableFunctions, triggerName, validationGroup }: ValidatorProps) {
+	constructor({ validationGroup, element, additionalInvalidClasses, triggerableFunctions, triggerName }: ValidatorProps) {
 		this.validationGroup = validationGroup
 		this.element = element
+		this.additionalInvalidClasses = additionalInvalidClasses
 		this.name = this.element.getAttribute('name')
 		this.triggerableFunctions = triggerableFunctions
 		this.validations = this.setValidations()
@@ -194,12 +200,14 @@ export class Validator {
 		p.textContent = this.errorMessages[validationName]
 		this.errorTipElement!.appendChild(p)
 		this.element.classList.add('is-invalid')
+		this.additionalInvalidClasses?.forEach((_class) => this.element.classList.add(_class))
 	}
 	showCustomErrorMessage(errorMessage: string) {
 		const p = document.createElement('p')
 		p.textContent = errorMessage
 		this.errorTipElement!.appendChild(p)
 		this.element.classList.add('is-invalid')
+		this.additionalInvalidClasses?.forEach((_class) => this.element.classList.add(_class))
 	}
 	validate() {
 		if (Array.prototype.includes.call(this.element.classList, 'ignore-validation')) return
@@ -210,8 +218,11 @@ export class Validator {
 			this.validateFunctions[validation.includes('-') ? validation.split('-')[0] : validation]()
 			this.currentValidation = null
 		})
-		if (this.errorTipElement!.innerHTML == '') this.element.classList.remove('is-invalid')
-		if (!!this.validationGroup.querySelectorAll('.is-invalid').length)
+		if (this.errorTipElement!.innerHTML == '') {
+			this.element.classList.remove('is-invalid')
+			this.additionalInvalidClasses?.forEach((_class) => this.element.classList.remove(_class))
+		}
+		if (this.validationGroup.querySelectorAll('.is-invalid').length)
 			this.validationGroup.querySelectorAll('.is-invalid')[0].scrollIntoView({ behavior: 'smooth', block: 'center' })
 	}
 }

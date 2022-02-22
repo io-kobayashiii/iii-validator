@@ -67,7 +67,11 @@ element.addEventListener('click', () => Validator.trigger('validate'))
 <br>
 
 # エラーとなった要素のスタイル
-'validate' がトリガーされたあと、エラーとなったバリデーション対象要素には `is-invalid` クラスが付与されますので `.is-invalid` に任意のスタイルを定義してください。
+'validate' がトリガーされたあと、エラーとなったバリデーション対象要素には `is-invalid` クラスが付与されますので `.is-invalid` に任意のスタイルを定義するか、 iii-validator のインスタンス生成時に次のように配列形式で `additionalInvalidClasses` を渡すことで `is-invalid` クラスに加えて任意のクラスを付与できます。  
+
+```html
+const Validator = new ValidatorInitializer({additionalInvalidClasses: ['bg-red-200', 'text-red']})
+```
 
 <br>
 <br>
@@ -98,20 +102,18 @@ element.addEventListener('click', () => Validator.trigger('validate'))
 
 ### 使用例
 ```html
-<div class='form-group'>
-    <div class='flex'>
-        <label>名前</label>
-        <div>
-            <input name='name' type='text' class='validate validations::multipleEmpty multipleEmptyGroup::profile multipleEmptyName::名前'>
-            <p class='error-tip'></p>
-        </div>
+<div class='form-group flex'>
+    <label>名前</label>
+    <div>
+        <input name='name' type='text' class='validate validations::multipleEmpty multipleEmptyGroup::profile multipleEmptyName::名前'>
+        <p class='error-tip'></p>
     </div>
-    <div class='flex'>
-        <label>メールアドレス</label>
-        <div>
-            <input name='email' type='text' class='validate validations::multipleEmpty multipleEmptyGroup::profile multipleEmptyName::メールアドレス'>
-            <p class='error-tip'></p>
-        </div>
+</div>
+<div class='form-group flex'>
+    <label>メールアドレス</label>
+    <div>
+        <input name='email' type='text' class='validate validations::multipleEmpty multipleEmptyGroup::profile multipleEmptyName::メールアドレス'>
+        <p class='error-tip'></p>
     </div>
 </div>
 ```
@@ -220,7 +222,7 @@ xx文字以上、yy文字以下のバリデーションです。
 
 ## 【halfWidthNumber】
 ### 概要
-半角英数字のバリデーションです。
+半角数字のバリデーションです。
 
 ### 使用方法
 バリデーション対象要素に `validations::halfWidthNumber` クラスを付与します。
