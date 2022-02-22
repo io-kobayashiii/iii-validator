@@ -69,7 +69,7 @@ element.addEventListener('click', () => Validator.trigger('validate'))
 # エラーとなった要素のスタイル
 'validate' がトリガーされたあと、エラーとなったバリデーション対象要素には `is-invalid` クラスが付与されますので `.is-invalid` に任意のスタイルを定義するか、 iii-validator のインスタンス生成時に次のように配列形式で `additionalInvalidClasses` を渡すことで `is-invalid` クラスに加えて任意のクラスを付与できます。  
 
-```html
+```javascript
 const Validator = new ValidatorInitializer({additionalInvalidClasses: ['bg-red-200', 'text-red']})
 ```
 
