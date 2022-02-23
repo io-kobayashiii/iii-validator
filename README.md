@@ -11,7 +11,7 @@ npm install iii-validator
 
 # 基本的な使い方
 1. バリデーション対象の input / select / textarea 要素に `validate` クラスを付与
-2. 1で `validate` クラスを付与した要素に `validations::xxxx` の形式で実行するバリデーションを指定
+2. 1で `validate` クラスを付与した要素に `validations::xxxx` の形式で実行するバリデーションを指定したクラスを付与
 3. バリデーションを通過しなかった場合にエラーメッセージを表示する要素を用意し `error-tip` クラスを付与
 4. バリデーション対象要素と error-tip 要素を `form-group` クラスを付与した要素でラップ
 
@@ -19,7 +19,7 @@ npm install iii-validator
 ```html
 <div class='form-group'>
     <input name='email' type='text' class='validate validations::empty'>
-    <p class='error-tip'></p>
+    <div class='error-tip'></div>
 </div>
 ```
 
@@ -47,7 +47,7 @@ element.addEventListener('click', () => Validator.trigger('validate'))
 ```html
 <div class='form-group'>
     <input name='email' type='text' class='validate validations::empty:email'>
-    <p class='error-tip'></p>
+    <div class='error-tip'></div>
 </div>
 ```
 
@@ -67,10 +67,10 @@ element.addEventListener('click', () => Validator.trigger('validate'))
 <br>
 
 # エラーとなった要素のスタイル
-'validate' がトリガーされたあと、エラーとなったバリデーション対象要素には `is-invalid` クラスが付与されますので `.is-invalid` に任意のスタイルを定義するか、 iii-validator のインスタンス生成時に次のように配列形式で `additionalInvalidClasses` を渡すことで `is-invalid` クラスに加えて任意のクラスを付与できます。  
+'validate' がトリガーされたあと、エラーとなったバリデーション対象要素には `is-invalid` クラスが付与されますので `.is-invalid` に任意のスタイルを定義するか、 iii-validator のインスタンス生成時に次のように配列形式で `invalidClasses` を渡すことで `is-invalid` クラスに加えて任意のクラスを付与できます。  
 
 ```javascript
-const Validator = new ValidatorInitializer({additionalInvalidClasses: ['bg-red-200', 'text-red']})
+const Validator = new ValidatorInitializer({invalidClasses: ['bg-red-200', 'text-red']})
 ```
 
 <br>
@@ -106,14 +106,14 @@ const Validator = new ValidatorInitializer({additionalInvalidClasses: ['bg-red-2
     <label>名前</label>
     <div>
         <input name='name' type='text' class='validate validations::multipleEmpty multipleEmptyGroup::profile multipleEmptyName::名前'>
-        <p class='error-tip'></p>
+        <div class='error-tip'></div>
     </div>
 </div>
 <div class='form-group flex'>
     <label>メールアドレス</label>
     <div>
         <input name='email' type='text' class='validate validations::multipleEmpty multipleEmptyGroup::profile multipleEmptyName::メールアドレス'>
-        <p class='error-tip'></p>
+        <div class='error-tip'></div>
     </div>
 </div>
 ```
@@ -148,11 +148,11 @@ const Validator = new ValidatorInitializer({additionalInvalidClasses: ['bg-red-2
 ```html
 <div class='form-group'>
     <input name='email' type='text' class='validate validations::empty:email'>
-    <p class='error-tip'></p>
+    <div class='error-tip'></div>
 </div>
 <div class='form-group'>
     <input name='email_confirmation' type='text' class='validate validations::confirmation confirmationBase::email'>
-    <p class='error-tip'></p>
+    <div class='error-tip'></div>
 </div>
 ```
 
@@ -172,7 +172,7 @@ const Validator = new ValidatorInitializer({additionalInvalidClasses: ['bg-red-2
 ```html
 <div class='form-group'>
     <input name='password' type='password' class='validate validations::minimumCharacters-8'>
-    <p class='error-tip'></p>
+    <div class='error-tip'></div>
 </div>
 ```
 
@@ -192,7 +192,7 @@ const Validator = new ValidatorInitializer({additionalInvalidClasses: ['bg-red-2
 ```html
 <div class='form-group'>
     <input name='password' type='password' class='validate validations::maximumCharacters-16'>
-    <p class='error-tip'></p>
+    <div class='error-tip'></div>
 </div>
 ```
 
@@ -212,7 +212,7 @@ xx文字以上、yy文字以下のバリデーションです。
 ```html
 <div class='form-group'>
     <input name='password' type='password' class='validate validations::charactersRange-8-16'>
-    <p class='error-tip'></p>
+    <div class='error-tip'></div>
 </div>
 ```
 
@@ -252,3 +252,48 @@ xx文字以上、yy文字以下のバリデーションです。
 <br>
 <br>
 <br>
+<br>
+<br>
+
+# オプション一覧
+オプションはインスタンス生成時にオブジェクト形式で渡せます。  
+オプションのプロパティはすべてオプショナルなので、必要なものだけ渡してください。
+
+|オプション名|型|デフォルト値|説明|
+|----|----|----|----|
+|validationGroup|Document \| HTMLElement|document| iii-validator の探索ルートを指定できます。ページ内に複数の `<form>` があり、各 `<form>` ごとにバリデーションを行いたい場合には form 要素を渡すか、任意のHTMLElementを渡して探索ルートとしてください。|
+|validClasses|string[]|undefined| `.validate` を付与した要素がバリデーションに通過したときに付与したいクラス名を配列形式で指定できます。ひとつだけクラス名を渡す場合も配列形式にしてください。|
+|invalidClasses|string[]|undefined| `.validate` を付与した要素がバリデーションに通過しなかったときに付与したいクラス名を配列形式で指定できます。ひとつだけクラス名を渡す場合も配列形式にしてください。|
+
+<br>
+<br>
+<br>
+<br>
+<br>
+
+# トリガー
+以下のようにトリガーすると、任意のタイミングで特定のバリデーション対象要素にバリデーションを実行できます。
+
+```html
+<div class='form-group flex'>
+    <label>ユーザー名</label>
+    <div>
+        <input name='user_name' type='text' class='validate validations::empty'>
+        <div class='error-tip'></div>
+    </div>
+</div>
+<div class='form-group flex'>
+    <label>メールアドレス</label>
+    <div>
+        <input name='email' type='text' class='validate validations::empty:email'>
+        <div class='error-tip'></div>
+    </div>
+</div>
+```
+
+トリガーしたい要素の name 属性の値を validate: のあとに指定
+
+```javascript
+Validator.trigger('validate:user_name')
+// [name=user_name] 属性を持つ要素にバリデーションをトリガー
+```

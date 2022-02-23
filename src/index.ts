@@ -65,7 +65,7 @@ export class Validator {
 	triggerableFunctions: TriggerableFunctions
 	validations?: string[]
 	formGroupElement: HTMLElement | null
-	styleTargetElement: boolean
+	validityStyleTarget: HTMLElement | null
 	errorTipElement: HTMLElement | null
 	errorMessages: { [key: string]: string }
 	validateFunctions: { [key: string]: () => void }
@@ -80,12 +80,14 @@ export class Validator {
 		this.triggerableFunctions = triggerableFunctions
 		this.validations = this.setValidations()
 		this.formGroupElement = element.closest('.form-group')
-		this.styleTargetElement = !!this.formGroupElement!.querySelector('.validate-style-target')
+		this.validityStyleTarget = this.formGroupElement!.querySelector('.validity-style-target')
 		this.errorTipElement = this.formGroupElement!.querySelector('.error-tip')
 		this.errorMessages = this.setErrorMessages()
 		this.validateFunctions = this.setValidateFunctions()
 		this.value = null
 		this.currentValidation = null
+		this.showErrorMessage.prototype.adjustValidationClasses = this.adjustValidationClasses
+		this.showCustomErrorMessage.prototype.adjustValidationClasses = this.adjustValidationClasses
 		this.triggerableFunctions.register(triggerName, () => this.validate())
 		this.triggerableFunctions.register(`${triggerName}:${this.name}`, () => this.validate())
 	}
@@ -112,13 +114,18 @@ export class Validator {
 	setValidateFunctions() {
 		return {
 			empty: () => {
-				const value = this.value as string
 				switch (this.element.tagName) {
-					case 'input' || 'textarea':
-						if (this.value == '') this.showErrorMessage('empty')
+					case 'INPUT' || 'TEXTAREA':
+						if (this.value == '') {
+							this.showErrorMessage('empty')
+							this.adjustValidationClasses({ validity: false })
+						}
 						break
-					case 'select':
-						if (value == 'unselected' || value == '') this.showErrorMessage('empty')
+					case 'SELECT':
+						if ((this.value as string) == 'unselected' || (this.value as string) == '') {
+							this.showErrorMessage('empty')
+							this.adjustValidationClasses({ validity: false })
+						}
 						break
 					default:
 						break
@@ -145,64 +152,67 @@ export class Validator {
 						if (index == multipleEmptyElements.length - 1) errorMessage += `のいずれかの入力は必須です。`
 					})
 					this.showCustomErrorMessage(errorMessage)
+					this.adjustValidationClasses({ validity: false })
 				}
 			},
 			email: () => {
-				const value = this.value as string
-				if (value == '') return
 				if (
-					!value.match(
+					!(this.value as string).match(
 						/^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.||~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.||~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))$/i,
 					)
 				) {
 					this.showErrorMessage('email')
+					this.adjustValidationClasses({ validity: false })
 				}
 			},
 			confirmation: () => {
-				const value = this.value as string
-				if (value == '') return
 				let confirmationBase = '' as string
 				Array.prototype.forEach.call(this.element.classList, (_class: string) => {
 					if (_class.match(/^confirmationBase::/)) confirmationBase = _class.split('::')[1]
 				})
-				if (value != this.validationGroup.querySelector<HTMLInputElement>(`[name=${confirmationBase}]`)!.value) {
+				if ((this.value as string) != this.validationGroup.querySelector<HTMLInputElement>(`[name=${confirmationBase}]`)!.value) {
 					this.showErrorMessage('confirmation')
+					this.adjustValidationClasses({ validity: false })
 				}
 			},
 			minimumCharacters: () => {
-				const value = this.value as string
-				if (value == '') return
 				const minimumCharacters = this.currentValidation?.split('-')[1]
-				if (value.length < Number(minimumCharacters)) this.showCustomErrorMessage(`${minimumCharacters}文字以上必要です。`)
+				if ((this.value as string).length < Number(minimumCharacters)) {
+					this.showCustomErrorMessage(`${minimumCharacters}文字以上必要です。`)
+					this.adjustValidationClasses({ validity: false })
+				}
 			},
 			maximumCharacters: () => {
-				const value = this.value as string
-				if (value == '') return
 				const maximumCharacters = this.currentValidation?.split('-')[1]
-				if (Number(maximumCharacters) < value.length) this.showCustomErrorMessage(`${maximumCharacters}文字以下で入力してください。`)
+				if (Number(maximumCharacters) < (this.value as string).length) {
+					this.showCustomErrorMessage(`${maximumCharacters}文字以下で入力してください。`)
+					this.adjustValidationClasses({ validity: false })
+				}
 			},
 			halfWidthNumber: () => {
-				const value = this.value as string
-				if (value == '') return
-				if (!value.match(/^[0-9\s!"#\$%&'\(\)=~\|`{\+\*}<>\?_\-\^\\@\[;:\],\.\/\^]+$/)) this.showErrorMessage('halfWidthNumber')
+				if (!(this.value as string).match(/^[0-9\s!"#\$%&'\(\)=~\|`{\+\*}<>\?_\-\^\\@\[;:\],\.\/\^]+$/)) {
+					this.showErrorMessage('halfWidthNumber')
+					this.adjustValidationClasses({ validity: false })
+				}
 			},
 			katakana: () => {
-				const value = this.value as string
-				if (value == '') return
-				if (!value.match(/^[ァ-ヾ０-９－\s　！”＃＄％＆’（）＝～｜‘｛＋＊｝＜＞？＿－＾￥＠「；：」、。・]+$/)) this.showErrorMessage('katakana')
+				if (!(this.value as string).match(/^[ァ-ヾ０-９－\s　！”＃＄％＆’（）＝～｜‘｛＋＊｝＜＞？＿－＾￥＠「；：」、。・]+$/)) {
+					this.showErrorMessage('katakana')
+					this.adjustValidationClasses({ validity: false })
+				}
 			},
 			hiragana: () => {
-				const value = this.value as string
-				if (value == '') return
-				if (!value.match(/^[ぁ-んー０-９－\s　！”＃＄％＆’（）＝～｜‘｛＋＊｝＜＞？＿－＾￥＠「；：」、。・]+$/)) this.showErrorMessage('hiragana')
+				if (!(this.value as string).match(/^[ぁ-んー０-９－\s　！”＃＄％＆’（）＝～｜‘｛＋＊｝＜＞？＿－＾￥＠「；：」、。・]+$/)) {
+					this.showErrorMessage('hiragana')
+					this.adjustValidationClasses({ validity: false })
+				}
 			},
 			charactersRange: () => {
-				const value = this.value as string
-				if (value == '') return
 				const minimumCharacters = this.currentValidation?.split('-')[1]
 				const maximumCharacters = this.currentValidation?.split('-')[2]
-				if (value.length < Number(minimumCharacters) || Number(maximumCharacters) < value.length) {
+				if ((this.value as string).length < Number(minimumCharacters) || Number(maximumCharacters) < (this.value as string).length) {
 					this.showCustomErrorMessage(`${minimumCharacters}文字以上${maximumCharacters}以下で入力してください。`)
+					this.adjustValidationClasses({ validity: false })
 				}
 			},
 		}
@@ -211,17 +221,34 @@ export class Validator {
 		const p = document.createElement('p')
 		p.textContent = this.errorMessages[validationName]
 		this.errorTipElement!.appendChild(p)
-		this.validClasses?.forEach((_class) => this.element.classList.remove(_class))
-		this.element.classList.add('is-invalid')
-		this.invalidClasses?.forEach((_class) => this.element.classList.add(_class))
 	}
 	showCustomErrorMessage(errorMessage: string) {
 		const p = document.createElement('p')
 		p.textContent = errorMessage
 		this.errorTipElement!.appendChild(p)
-		this.validClasses?.forEach((_class) => this.element.classList.remove(_class))
-		this.element.classList.add('is-invalid')
-		this.invalidClasses?.forEach((_class) => this.element.classList.add(_class))
+	}
+	adjustValidationClasses({ validity }: { validity: boolean }) {
+		if (validity) {
+			this.element.classList.remove('is-invalid')
+			this.validClasses?.forEach((_class) => {
+				this.element.classList.add(_class)
+				this.validityStyleTarget?.classList.add(_class)
+			})
+			this.invalidClasses?.forEach((_class) => {
+				this.element.classList.remove(_class)
+				this.validityStyleTarget?.classList.remove(_class)
+			})
+		} else {
+			this.element.classList.add('is-invalid')
+			this.validClasses?.forEach((_class) => {
+				this.element.classList.remove(_class)
+				this.validityStyleTarget?.classList.remove(_class)
+			})
+			this.invalidClasses?.forEach((_class) => {
+				this.element.classList.add(_class)
+				this.validityStyleTarget?.classList.add(_class)
+			})
+		}
 	}
 	validate() {
 		if (Array.prototype.includes.call(this.element.classList, 'ignore-validation')) return
@@ -229,15 +256,11 @@ export class Validator {
 		this.errorTipElement!.innerHTML = ''
 		this.validations!.forEach((validation) => {
 			this.currentValidation = validation
-			this.validateFunctions[validation.includes('-') ? validation.split('-')[0] : validation]()
+			if (validation == 'empty' || validation == 'multipleEmpty') this.validateFunctions[validation]()
+			if (validation != 'empty' && (this.value as string) != '') this.validateFunctions[validation.includes('-') ? validation.split('-')[0] : validation]()
 			this.currentValidation = null
 		})
-		if (this.errorTipElement!.innerHTML == '') {
-			this.validClasses?.forEach((_class) => this.element.classList.add(_class))
-			this.element.classList.remove('is-invalid')
-			this.invalidClasses?.forEach((_class) => this.element.classList.remove(_class))
-		}
-		if (this.validationGroup.querySelectorAll('.is-invalid').length)
-			this.validationGroup.querySelectorAll('.is-invalid')[0].scrollIntoView({ behavior: 'smooth', block: 'center' })
+		if (this.errorTipElement!.innerHTML == '') this.adjustValidationClasses({ validity: true })
+		if (this.validationGroup.querySelectorAll('.is-invalid').length) this.validationGroup.querySelectorAll('.is-invalid')[0].scrollIntoView({ behavior: 'smooth', block: 'center' })
 	}
 }
