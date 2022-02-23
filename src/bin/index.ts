@@ -86,8 +86,6 @@ export class Validator {
 		this.validateFunctions = this.setValidateFunctions()
 		this.value = null
 		this.currentValidation = null
-		this.showErrorMessage.prototype.adjustValidationClasses = this.adjustValidationClasses
-		this.showCustomErrorMessage.prototype.adjustValidationClasses = this.adjustValidationClasses
 		this.triggerableFunctions.register(triggerName, () => this.validate())
 		this.triggerableFunctions.register(`${triggerName}:${this.name}`, () => this.validate())
 	}
@@ -190,7 +188,7 @@ export class Validator {
 				}
 			},
 			halfWidthNumber: () => {
-				if (!(this.value as string).match(/^[0-9\s!"#\$%&'\(\)=~\|`{\+\*}<>\?_\-\^\\@\[;:\],\.\/\^]+$/)) {
+				if (!(this.value as string).match(/^[0-9\s!"#$%&'()=~|`{+*}<>?_\-^\\@[;:\],./^]+$/)) {
 					this.showErrorMessage('halfWidthNumber')
 					this.adjustValidationClasses({ validity: false })
 				}
