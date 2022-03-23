@@ -15,8 +15,6 @@ class TriggerableFunctions {
 	}
 }
 
-const TriggerableFunctionsInstance = new TriggerableFunctions()
-
 type ValidatorInitializerProps = {
 	validationGroup?: Document | HTMLElement
 	validClasses?: string[]
@@ -43,9 +41,9 @@ export default class ValidatorInitializer {
 		this.triggerName = options?.triggerName || ('validate' as string)
 		this.dispatchOnBlur = options?.dispatchOnBlur || false
 		this.dispatchOnChange = options?.dispatchOnChange || false
-		this.TriggerableFunctions = TriggerableFunctionsInstance
+		this.TriggerableFunctions = new TriggerableFunctions()
 		this.fieldsCount = 0
-		if (!!!options?.manualInitialize) this.initialize()
+		if (!options?.manualInitialize) this.initialize()
 	}
 	initialize() {
 		this.fieldsCount = this.validationGroup.getElementsByClassName('validate').length
@@ -66,7 +64,7 @@ export default class ValidatorInitializer {
 		this.TriggerableFunctions.trigger(triggerName)
 	}
 	hasNoInvalid() {
-		return !!!this.validationGroup.querySelectorAll('.is-invalid:not(.ignore-validation)').length
+		return !this.validationGroup.querySelectorAll('.is-invalid:not(.ignore-validation)').length
 	}
 }
 
