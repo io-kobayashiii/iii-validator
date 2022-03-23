@@ -14,36 +14,57 @@ class TriggerableFunctions {
 		this.functions[functionName].forEach((_function) => _function())
 	}
 }
+
 type ValidatorInitializerProps = {
 	validationGroup?: Document | HTMLElement
 	validClasses?: string[]
 	invalidClasses?: string[]
 	triggerName?: string
+	dispatchOnBlur?: boolean
+	dispatchOnChange?: boolean
+	manualInitialize?: boolean
 }
 
 export default class ValidatorInitializer {
 	validationGroup: Document | HTMLElement
+	validClasses: string[]
+	invalidClasses: string[]
 	triggerName: string
+	dispatchOnBlur: boolean
+	dispatchOnChange: boolean
 	TriggerableFunctions: TriggerableFunctions
-	elements: HTMLCollectionOf<Element>
+	fieldsCount: number
 	constructor(options?: ValidatorInitializerProps) {
 		this.validationGroup = options?.validationGroup || document
+		this.validClasses = options?.validClasses || []
+		this.invalidClasses = options?.invalidClasses || []
 		this.triggerName = options?.triggerName || ('validate' as string)
+		this.dispatchOnBlur = options?.dispatchOnBlur || false
+		this.dispatchOnChange = options?.dispatchOnChange || false
 		this.TriggerableFunctions = new TriggerableFunctions()
-		this.elements = this.validationGroup.getElementsByClassName('validate')
-		Array.prototype.forEach.call(this.elements, (element) => {
+		this.fieldsCount = 0
+		if (!options?.manualInitialize) this.initialize()
+	}
+	initialize() {
+		this.fieldsCount = this.validationGroup.getElementsByClassName('validate').length
+		Array.prototype.forEach.call(this.validationGroup.getElementsByClassName('validate'), (element) => {
 			new Validator({
 				validationGroup: this.validationGroup,
 				element: element,
-				validClasses: options?.validClasses,
-				invalidClasses: options?.invalidClasses,
+				validClasses: this.validClasses,
+				invalidClasses: this.invalidClasses,
 				triggerableFunctions: this.TriggerableFunctions,
 				triggerName: this.triggerName,
+				dispatchOnBlur: this.dispatchOnBlur,
+				dispatchOnChange: this.dispatchOnChange,
 			})
 		})
 	}
 	trigger(triggerName: string) {
 		this.TriggerableFunctions.trigger(triggerName)
+	}
+	hasNoInvalid() {
+		return !this.validationGroup.querySelectorAll('.is-invalid:not(.ignore-validation)').length
 	}
 }
 
@@ -54,6 +75,8 @@ type ValidatorProps = {
 	invalidClasses?: string[]
 	triggerableFunctions: TriggerableFunctions
 	triggerName: string
+	dispatchOnBlur: boolean
+	dispatchOnChange: boolean
 }
 
 export class Validator {
@@ -71,7 +94,7 @@ export class Validator {
 	validateFunctions: { [key: string]: () => void }
 	value: number | boolean | string | null
 	currentValidation: string | null
-	constructor({ validationGroup, element, validClasses, invalidClasses, triggerableFunctions, triggerName }: ValidatorProps) {
+	constructor({ validationGroup, element, validClasses, invalidClasses, triggerableFunctions, triggerName, dispatchOnBlur, dispatchOnChange }: ValidatorProps) {
 		this.validationGroup = validationGroup
 		this.element = element
 		this.validClasses = validClasses
@@ -86,8 +109,10 @@ export class Validator {
 		this.validateFunctions = this.setValidateFunctions()
 		this.value = null
 		this.currentValidation = null
-		this.triggerableFunctions.register(triggerName, () => this.validate())
-		this.triggerableFunctions.register(`${triggerName}:${this.name}`, () => this.validate())
+		this.triggerableFunctions.register(triggerName, () => !this.element.classList.contains('ignore-validation') && this.validate())
+		this.triggerableFunctions.register(`${triggerName}:${this.name}`, () => !this.element.classList.contains('ignore-validation') && this.validate())
+		dispatchOnBlur && element.addEventListener('blur', () => !this.element.classList.contains('ignore-validation') && this.triggerableFunctions.trigger(triggerName))
+		dispatchOnChange && element.addEventListener('change', () => !this.element.classList.contains('ignore-validation') && this.triggerableFunctions.trigger(triggerName))
 	}
 	setValidations() {
 		let validations = [] as string[]
@@ -249,7 +274,6 @@ export class Validator {
 		}
 	}
 	validate() {
-		if (Array.prototype.includes.call(this.element.classList, 'ignore-validation')) return
 		this.setValue()
 		this.errorTipElement!.innerHTML = ''
 		this.validations!.forEach((validation) => {
@@ -259,6 +283,5 @@ export class Validator {
 			this.currentValidation = null
 		})
 		if (this.errorTipElement!.innerHTML == '') this.adjustValidationClasses({ validity: true })
-		if (this.validationGroup.querySelectorAll('.is-invalid').length) this.validationGroup.querySelectorAll('.is-invalid')[0].scrollIntoView({ behavior: 'smooth', block: 'center' })
 	}
 }
