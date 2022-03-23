@@ -47,13 +47,14 @@ export default class ValidatorInitializer {
 	}
 	initialize() {
 		this.fieldsCount = this.validationGroup.getElementsByClassName('validate').length
+		const triggerableFunctionsInstance = new TriggerableFunctions()
 		Array.prototype.forEach.call(this.validationGroup.getElementsByClassName('validate'), (element) => {
 			new Validator({
 				validationGroup: this.validationGroup,
 				element: element,
 				validClasses: this.validClasses,
 				invalidClasses: this.invalidClasses,
-				triggerableFunctions: this.TriggerableFunctions,
+				triggerableFunctions: triggerableFunctionsInstance,
 				triggerName: this.triggerName,
 				dispatchOnBlur: this.dispatchOnBlur,
 				dispatchOnChange: this.dispatchOnChange,
