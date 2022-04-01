@@ -18,11 +18,12 @@ export default class ValidatorController {
 		this.validClasses = options?.validClasses
 		this.invalidClasses = options?.invalidClasses
 		this.errorStatus = null
+		this.initialize(options?.validationGroup)
 	}
 	logId() {
 		console.log(`log ::: ValidatorController.logId / this.id: ${this.id}`)
 	}
-	initialize(validationGroup?: HTMLElement | Document) {
+	private initialize(validationGroup?: HTMLElement | Document) {
 		console.log(`log ::: ValidatorController.initialize`)
 		this.validationGroup = validationGroup ? validationGroup : document
 		const elements = this.validationGroup.getElementsByClassName('validate')
@@ -30,7 +31,7 @@ export default class ValidatorController {
 			this.addValidator(element)
 		})
 	}
-	addValidator(element: FormElements) {
+	private addValidator(element: FormElements) {
 		console.log(`log ::: ValidatorController.addValidator`)
 		const name = element.getAttribute('name')
 		name == null
