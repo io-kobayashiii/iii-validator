@@ -25,13 +25,13 @@ npm install iii-validator
 
 上記のように要素を準備したら iii-validator のインスタンスを生成  
 ```javascript
-import ValidatorInitializer from 'iii-validator'
-const Validator = new ValidatorInitializer()
+import MyValidator from 'iii-validator'
+const Validator = new MyValidator()
 ```
 
-あとは任意のタイミングで `validate` をトリガー  
+あとは任意のタイミングでバリデーションを実行
 ```javascript
-element.addEventListener('click', () => Validator.trigger('validate'))
+element.addEventListener('click', () => Validator.validate())
 ```
 
 <br>
@@ -46,7 +46,7 @@ element.addEventListener('click', () => Validator.trigger('validate'))
 例）
 ```html
 <div class='form-group'>
-    <input name='email' type='text' class='validate validations::empty:email'>
+    <input name='email' type='text' class='validate validations::required:email'>
     <div class='error-tip'></div>
 </div>
 ```
@@ -58,7 +58,7 @@ element.addEventListener('click', () => Validator.trigger('validate'))
 <br>
 
 # error-tip のスタイル
-'validate' がトリガーされたあと、エラーとなった form-group 内の error-tip 内にはエラーメッセージが追加されますので `.error-tip` に任意のスタイルを定義してください。
+バリデーション実行後エラーとなった form-group の error-tip 内にはエラーメッセージが追加されますので `.error-tip` に任意のスタイルを定義してください。
 
 <br>
 <br>
@@ -67,7 +67,7 @@ element.addEventListener('click', () => Validator.trigger('validate'))
 <br>
 
 # エラーとなった要素のスタイル
-'validate' がトリガーされたあと、エラーとなったバリデーション対象要素には `is-invalid` クラスが付与されますので `.is-invalid` に任意のスタイルを定義するか、 iii-validator のインスタンス生成時に次のように配列形式で `invalidClasses` を渡すことで `is-invalid` クラスに加えて任意のクラスを付与できます。  
+バリデーション実行後エラーとなったバリデーション対象要素には `is-invalid` クラスが付与されますので `.is-invalid` に任意のスタイルを定義するか、 react-iii-validator のインスタンス生成時に次のように配列形式で `invalidClasses` を渡すことで `is-invalid` クラスに加えて任意のクラスを付与できます。  
 
 ```javascript
 const Validator = new ValidatorInitializer({invalidClasses: ['bg-red-200', 'text-red']})
@@ -80,39 +80,39 @@ const Validator = new ValidatorInitializer({invalidClasses: ['bg-red-200', 'text
 <br>
 
 # 実装済みバリデーションと使用方法一覧
-## 【empty】
+## 【required】
 ### 概要
 入力必須項目のバリデーションです。
 
 ### 使用方法
-バリデーション対象要素に `validations::empty` クラスを付与します。
+バリデーション対象要素に `validations::required` クラスを付与します。
 
 <br>
 <br>
 <br>
 
-## 【multipleEmpty】
+## 【multipleRequired】
 ### 概要
 複数のバリデーション対象要素において、少なくともいずれかひとつに入力が必要な場合のバリデーションです。
 
 ### 使用方法
-1. 複数のバリデーション対象要素に `validations::multipleEmpty` クラスを付与します。
-2. 1で対象とした各要素に `multipleEmptyGroup::{groupId}` クラスを付与します。 ※{groupId} には各要素共通の文字列を指定
-3. 1で対象とした各要素にエラーメッセージで表示する名前を `multipleEmptyName::{name}` クラスを付与します。 ※{name} は日本語使用可能
+1. 複数のバリデーション対象要素に `validations::multipleRequired` クラスを付与します。
+2. 1で対象とした各要素に `multipleRequiredGroup::{groupId}` クラスを付与します。 ※{groupId} には各要素共通の文字列を指定
+3. 1で対象とした各要素にエラーメッセージで表示する名前を `multipleRequiredName::{name}` クラスを付与します。 ※{name} は日本語使用可能
 
 ### 使用例
 ```html
 <div class='form-group flex'>
     <label>名前</label>
     <div>
-        <input name='name' type='text' class='validate validations::multipleEmpty multipleEmptyGroup::profile multipleEmptyName::名前'>
+        <input name='name' type='text' class='validate validations::multipleRequired multipleRequiredGroup::profile multipleRequiredName::名前'>
         <div class='error-tip'></div>
     </div>
 </div>
 <div class='form-group flex'>
     <label>メールアドレス</label>
     <div>
-        <input name='email' type='text' class='validate validations::multipleEmpty multipleEmptyGroup::profile multipleEmptyName::メールアドレス'>
+        <input name='email' type='text' class='validate validations::multipleRequired multipleRequiredGroup::profile multipleRequiredName::メールアドレス'>
         <div class='error-tip'></div>
     </div>
 </div>
@@ -256,6 +256,8 @@ xx文字以上、yy文字以下のバリデーションです。
 <br>
 
 # オプション一覧
+
+## インスタンス生成時
 オプションはインスタンス生成時にオブジェクト形式で渡せます。  
 オプションのプロパティはすべてオプショナルなので、必要なものだけ渡してください。
 
@@ -271,29 +273,27 @@ xx文字以上、yy文字以下のバリデーションです。
 <br>
 <br>
 
-# トリガー
-以下のようにトリガーすると、任意のタイミングで特定のバリデーション対象要素にバリデーションを実行できます。
+# バリデーション実行方法
+バリデーション実行時に任意の name を渡すことで特定のバリデーション対象要素にバリデーションを実行できます。
 
 ```html
 <div class='form-group flex'>
     <label>ユーザー名</label>
     <div>
-        <input name='user_name' type='text' class='validate validations::empty'>
+        <input name='user_name' type='text' class='validate validations::required'>
         <div class='error-tip'></div>
     </div>
 </div>
 <div class='form-group flex'>
     <label>メールアドレス</label>
     <div>
-        <input name='email' type='text' class='validate validations::empty:email'>
+        <input name='email' type='text' class='validate validations::required:email'>
         <div class='error-tip'></div>
     </div>
 </div>
 ```
 
-トリガーしたい要素の name 属性の値を validate: のあとに指定
-
 ```javascript
-Validator.trigger('validate:user_name')
+Validator.validate('user_name')
 // [name=user_name] 属性を持つ要素にバリデーションをトリガー
 ```
